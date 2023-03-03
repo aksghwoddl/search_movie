@@ -2,6 +2,7 @@ package com.lee.searchmovie.ui.main
 
 import android.os.Bundle
 import android.util.Log
+import android.view.KeyEvent
 import android.view.View
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -21,7 +22,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.mainViewModel =  viewModel
+        binding.run {
+            mainViewModel = viewModel
+            mainActivity = this@MainActivity
+        }
     }
 
     /**
@@ -56,12 +60,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
      * **/
     override fun addListeners() {
         with(binding){
-            searchButton.setOnClickListener { // 검색 버튼
-                if(searchEditText.text.isNotEmpty()){
-                    viewModel.setPage(1)
-                } else {
-                    viewModel.setToastMessage(resources.getString(R.string.input_keyword))
+            searchEditText.setOnKeyListener { _, keyCode , _ ->
+                when(keyCode) {
+                    KeyEvent.KEYCODE_ENTER -> {
+                        searchEditText.text?.let {
+                            if(it.isNotEmpty()){
+                                viewModel.setPage(1)
+                            } else {
+                                viewModel.setToastMessage(resources.getString(R.string.input_keyword))
+                            }
+                        }
+                    }
                 }
+                false
             }
         }
     }

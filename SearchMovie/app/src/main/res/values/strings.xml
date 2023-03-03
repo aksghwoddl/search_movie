@@ -4,4 +4,6 @@
     <!--Main -->
     <string name="search">검색</string>
     <string name="input_keyword">검색어를 입력해주세요.</string>
+    <string name="search_hint">영화 제목을 입력해주세요.</string>
+    <string name="current_keyword">최근 검색어</string>
 </resources>
