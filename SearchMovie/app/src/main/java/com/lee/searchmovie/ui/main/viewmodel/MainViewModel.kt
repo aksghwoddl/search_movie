@@ -62,6 +62,9 @@ class MainViewModel @Inject constructor(
         _isProgress.value = on
     }
 
+    /**
+     * 영화 검색하기
+     * **/
     fun searchMovie() {
         viewModelScope.launch {
             setIsProgress(true)

@@ -5,6 +5,6 @@ package com.lee.searchmovie.common
  * **/
 class Utils {
     companion object{
-
+        const val EXTRA_MOVIE_URL = "movie_url"
     }
 }
