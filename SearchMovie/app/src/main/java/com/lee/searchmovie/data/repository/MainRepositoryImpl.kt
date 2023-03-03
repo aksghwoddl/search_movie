@@ -1,5 +1,6 @@
 package com.lee.searchmovie.data.repository
 
+import com.lee.searchmovie.common.NetworkConst
 import com.lee.searchmovie.data.api.RestApi
 import com.lee.searchmovie.domain.repository.MainRepository
 import javax.inject.Inject
@@ -22,6 +23,6 @@ class MainRepositoryImpl @Inject constructor(
         clientKey: String,
         query: String,
         page: Int
-    ) = restApi.searchMovie(id , clientKey , query , page)
+    ) = restApi.searchMovie(id , clientKey , query , page , NetworkConst.DISPLAY_PAGE_VALUE)
 
 }

@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lee.searchmovie.BuildConfig
+import com.lee.searchmovie.data.model.remote.MovieDTO
 import com.lee.searchmovie.data.model.remote.MovieResultDTO
 import com.lee.searchmovie.domain.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,13 +19,26 @@ private const val TAG = "MainViewModel"
 class MainViewModel @Inject constructor(
     private val repository: MainRepository
 ) : ViewModel() {
-    val searchKeyword = MutableLiveData<String>()
+
+    private val _searchKeyword = MutableLiveData<String>()
+    val searchKeyword : LiveData<String>
+    get() = _searchKeyword
+    fun setSearchKeyword(keyword : String) {
+        _searchKeyword.value = keyword
+    }
 
     private val _searchResult = MutableLiveData<MovieResultDTO>()
     val searchResult : LiveData<MovieResultDTO>
     get() = _searchResult
     fun setSearchResult(result : MovieResultDTO){
         _searchResult.value = result
+    }
+
+    private val _movieList = MutableLiveData<ArrayList<MovieDTO>>()
+    val movieList : LiveData<ArrayList<MovieDTO>>
+    get() = _movieList
+    fun setMovieList(list : ArrayList<MovieDTO>){
+        _movieList.value = list
     }
 
     private val _page = MutableLiveData<Int>()
