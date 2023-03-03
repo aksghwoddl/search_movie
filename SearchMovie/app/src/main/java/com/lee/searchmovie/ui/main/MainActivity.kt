@@ -1,5 +1,7 @@
 package com.lee.searchmovie.ui.main
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -10,9 +12,13 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import com.lee.searchmovie.R
 import com.lee.searchmovie.common.NetworkConst
+import com.lee.searchmovie.common.Utils
 import com.lee.searchmovie.common.base.BaseActivity
+import com.lee.searchmovie.common.interfaces.OnItemClickListener
 import com.lee.searchmovie.common.wrapper.LinearLayoutManagerWrapper
+import com.lee.searchmovie.data.model.remote.MovieDTO
 import com.lee.searchmovie.databinding.ActivityMainBinding
+import com.lee.searchmovie.ui.detail.DetailActivity
 import com.lee.searchmovie.ui.main.adapter.SearchResultRecyclerAdapter
 import com.lee.searchmovie.ui.main.viewmodel.MainViewModel
 import dagger.hilt.android.AndroidEntryPoint
@@ -129,6 +135,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     private fun initRecyclerView() {
         searchResultRecyclerAdapter = SearchResultRecyclerAdapter()
+        searchResultRecyclerAdapter.setOnItemClickListener(ItemClickListener())
         binding.searchMovieRV.run {
             layoutManager = LinearLayoutManagerWrapper(this@MainActivity)
             adapter = searchResultRecyclerAdapter
@@ -162,6 +169,24 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                         viewModel.setPage(newPage)
                     }     
                 }
+            }
+        }
+    }
+
+    /**
+     * 검색 결과 클릭 리스너
+     * **/
+    private inner class ItemClickListener : OnItemClickListener {
+        override fun onClick(view: View, data: Any, position: Int) {
+            if(data is MovieDTO){
+                with(Intent(this@MainActivity , DetailActivity::class.java)){
+                    putExtra(Utils.EXTRA_MOVIE_URL , data.link)
+                    startActivity(this)
+                }
+                /*with(Intent(Intent.ACTION_VIEW)){ 브라우저로 열기
+                    this.data = Uri.parse(data.link)
+                    startActivity(this)
+                }*/
             }
         }
     }

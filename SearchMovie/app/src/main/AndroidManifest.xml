@@ -29,6 +29,10 @@
                 android:name="android.app.lib_name"
                 android:value="" />
         </activity>
+
+        <activity android:name=".ui.detail.DetailActivity">
+
+        </activity>
     </application>
 
     <uses-permission android:name="android.permission.INTERNET"/>
