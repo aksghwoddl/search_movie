@@ -19,6 +19,7 @@ interface RestApi {
         @Header(NetworkConst.NAVER_CLIENT_ID) id : String ,
         @Header(NetworkConst.NAVER_CLIENT_SECERET_KEY) secretKey : String ,
         @Query(NetworkConst.QUERY) query : String ,
-        @Query(NetworkConst.START) page : Int
+        @Query(NetworkConst.START) page : Int ,
+        @Query(NetworkConst.DISPLAY) display : Int
     ) : Response<MovieResultDTO>
 }

@@ -11,5 +11,8 @@ class NetworkConst {
         const val NAVER_CLIENT_SECERET_KEY = "X-Naver-Client-Secret"
         const val QUERY = "query"
         const val START = "start"
+        const val DISPLAY = "display"
+
+        const val DISPLAY_PAGE_VALUE = 20
     }
 }
