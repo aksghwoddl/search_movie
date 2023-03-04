@@ -1,7 +1,6 @@
 package com.lee.searchmovie.ui.main
 
 import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.KeyEvent
@@ -54,8 +53,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             }
 
             searchResult.observe(this@MainActivity){ // 검색 결과
-                if(checkFirstPage()){ // 검색 클릭으로 인해 처음 호출 1 page
-                    if(it.items.isEmpty()){ // 검색 결과가 존재하지 않을때
+                if(checkFirstPage()){ // 첫 페이지일 경우
+                    setMovieList(it.items)
+                } else { // 다음 페이지 부터는 리스트를 누적한다.
+                    movieList.value?.let { currentList ->
+                        val newList = ArrayList(currentList)
+                        newList.addAll(it.items)
+                        setMovieList(newList)
+                    }
+                }
+            }
+
+            movieList.observe(this@MainActivity){ // 검색된 영화 목록
+                if(checkFirstPage()){ // 첫 페이지일 경우
+                    if(it.isEmpty()){ // 검색 결과가 존재하지 않을때
                         binding.run {
                             noResultIV.visibility = View.VISIBLE
                             searchMovieRV.visibility = View.INVISIBLE
@@ -65,23 +76,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                             noResultIV.visibility = View.GONE
                             searchMovieRV.visibility = View.VISIBLE
                         }
-                        setMovieList(it.items)
+                       addNewList(it)
                     }
-                } else { // 추가 페이지의 경우
-                    if(it.items.isNotEmpty()){ // 검색 결과가 존재할때
-                        Log.d(TAG, "observeData: result is not empty")
-                        movieList.value?.let { currentList ->
-                            val newList = ArrayList(currentList)
-                            newList.addAll(it.items)
-                            setMovieList(newList)
-                        }
-                    }
-                }
-            }
-
-            movieList.observe(this@MainActivity){ // 검색된 영화 목록
-                if(::searchResultRecyclerAdapter.isInitialized){
-                    searchResultRecyclerAdapter.submitList(it)
+                } else { // 이후 페이지일때
+                    addNewList(it)
                 }
             }
 
@@ -130,6 +128,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 }
                 false
             }
+
+            searchTextInputLayout.setEndIconOnClickListener {
+                searchEditText.text.clear()
+                val emptyList = arrayListOf<MovieDTO>()
+                addNewList(emptyList)
+            }
         }
     }
 
@@ -155,6 +159,15 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     /**
+     * Adapter에 subList하는 함수
+     * **/
+    private fun addNewList(list : ArrayList<MovieDTO>) {
+        if(::searchResultRecyclerAdapter.isInitialized){
+            searchResultRecyclerAdapter.submitList(list)
+        }
+    }
+
+    /**
      * RecyclerView Scroll 리스너
      * **/
     private inner class ScrollListener : OnScrollListener() {
@@ -174,7 +187,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     }
 
     /**
-     * 검색 결과 클릭 리스너
+     * 아이템 클릭 리스너
      * **/
     private inner class ItemClickListener : OnItemClickListener {
         override fun onClick(view: View, data: Any, position: Int) {
