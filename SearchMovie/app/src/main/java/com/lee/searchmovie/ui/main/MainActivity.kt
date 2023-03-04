@@ -49,7 +49,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     override fun observeData() {
         with(viewModel){
             searchKeyword.observe(this@MainActivity){ // 검색 키워드
-                setPage(FIRST_PAGE)
+                if(it.isEmpty()){ // Clear Button이 눌려 검색 키워드가 비어있을때
+                    Log.d(TAG, "observeData: searchKeyword is set empty")
+                    val emptyList = arrayListOf<MovieDTO>()
+                    addNewList(emptyList)
+                } else { // 검색 키워드가 존재 할때
+                    setPage(FIRST_PAGE)
+                }
             }
 
             searchResult.observe(this@MainActivity){ // 검색 결과
@@ -114,13 +120,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
      * **/
     override fun addListeners() {
         with(binding){
-            searchEditText.setOnKeyListener { _, keyCode , _ ->
+            searchEditText.setOnKeyListener { _, keyCode , _ -> // 검색버튼
                 when(keyCode) {
                     KeyEvent.KEYCODE_ENTER -> {
                         searchEditText.text?.let {
-                            if(it.isNotEmpty()){
+                            if(it.isNotEmpty()){ // 검색창이 비어있지 않을때
                                 viewModel.setSearchKeyword(it.toString())
-                            } else {
+                            } else { // 검색창이 비어있을때
                                 viewModel.setToastMessage(resources.getString(R.string.input_keyword))
                             }
                         }
@@ -129,10 +135,9 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 false
             }
 
-            searchTextInputLayout.setEndIconOnClickListener {
+            searchTextInputLayout.setEndIconOnClickListener { // Clear Button
                 searchEditText.text.clear()
-                val emptyList = arrayListOf<MovieDTO>()
-                addNewList(emptyList)
+                viewModel.setSearchKeyword(searchEditText.text.toString())
             }
         }
     }
@@ -177,10 +182,12 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 if(viewModel.isProgress.value!!){ // 아직 로딩이 끝나지 않았음에도 연속으로 페이징 처리가 되는것을 방지
                     Log.d(TAG, "onScrollStateChanged: skip paging , app did not loading result yet")
                 } else {
-                    viewModel.page.value?.let { currentPage ->
-                        val newPage = currentPage + NetworkConst.DISPLAY_PAGE_VALUE
-                        viewModel.setPage(newPage)
-                    }     
+                    if(viewModel.searchKeyword.value!!.isNotEmpty()){ // 검색 키워드가 비어있지 않을때
+                        viewModel.page.value?.let { currentPage ->
+                            val newPage = currentPage + NetworkConst.DISPLAY_PAGE_VALUE
+                            viewModel.setPage(newPage)
+                        }
+                    }
                 }
             }
         }
