@@ -40,4 +40,9 @@ interface MainRepository {
      * - recentKeywordEntity : 삭제할 칼럼 정보
      * **/
     suspend fun deleteRecentKeyword(recentKeywordEntity: RecentKeywordEntity)
+
+    /**
+     * 모든 최근 검색어 삭제하기
+     * **/
+    suspend fun deleteAllRecentKeyword()
 }

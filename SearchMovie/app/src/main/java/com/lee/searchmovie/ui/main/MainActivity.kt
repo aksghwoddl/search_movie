@@ -1,7 +1,11 @@
 package com.lee.searchmovie.ui.main
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.os.Bundle
+import android.text.Editable
 import android.util.Log
 import android.view.KeyEvent
 import android.view.View
@@ -34,6 +38,7 @@ private const val RECYCLER_VIEW_BOTTOM = 1
 class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private val viewModel : MainViewModel by viewModels()
     private lateinit var searchResultRecyclerAdapter: SearchResultRecyclerAdapter
+    private lateinit var searchReceiver: SearchReceiver
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +47,14 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             mainActivity = this@MainActivity
         }
         initRecyclerView()
+        initBroadcastReceiver()
+    }
+
+    override fun onDestroy() {
+        if(::searchReceiver.isInitialized){
+            unregisterReceiver(searchReceiver)
+        }
+        super.onDestroy()
     }
 
     /**
@@ -132,6 +145,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                                         setSearchKeyword(it.toString())
                                         saveRecentKeyword() // 검색어 저장하기
                                     }
+                                    Utils.hideSoftInputKeyboard(this@MainActivity , root.windowToken)
                                 } else { // 검색창이 비어있을때
                                     viewModel.setToastMessage(resources.getString(R.string.input_keyword))
                                 }
@@ -151,13 +165,20 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     private fun initRecyclerView() {
         searchResultRecyclerAdapter = SearchResultRecyclerAdapter()
-        searchResultRecyclerAdapter.setOnItemClickListener(ItemClickListener())
+        searchResultRecyclerAdapter.setOnItemClickListener(ItemClickListener(this@MainActivity))
         binding.searchMovieRV.run {
             layoutManager = LinearLayoutManagerWrapper(this@MainActivity)
             adapter = searchResultRecyclerAdapter
-            addOnScrollListener(ScrollListener())
+            addOnScrollListener(ScrollListener(viewModel))
             itemAnimator = null // 깜빡임 방지
         }
+    }
+
+    private fun initBroadcastReceiver() {
+        searchReceiver = SearchReceiver(viewModel , binding)
+        val intentFilter = IntentFilter()
+        intentFilter.addAction(Utils.ACTION_SEARCH_KEYWORD)
+        registerReceiver(searchReceiver , intentFilter)
     }
 
     /**
@@ -192,7 +213,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     /**
      * RecyclerView Scroll 리스너
      * **/
-    private inner class ScrollListener : OnScrollListener() {
+    private class ScrollListener(private val viewModel : MainViewModel) : OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
             if(!recyclerView.canScrollVertically(RECYCLER_VIEW_BOTTOM)){
@@ -213,17 +234,38 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     /**
      * 아이템 클릭 리스너
      * **/
-    private inner class ItemClickListener : OnItemClickListener {
+    private class ItemClickListener(private val context : Context) : OnItemClickListener {
         override fun onClick(view: View, data: Any, position: Int) {
             if(data is MovieDTO){
-                with(Intent(this@MainActivity , DetailActivity::class.java)){
+                with(Intent( context, DetailActivity::class.java)){
                     putExtra(Utils.EXTRA_MOVIE_URL , data.link)
-                    startActivity(this)
+                    context.startActivity(this)
                 }
                 /*with(Intent(Intent.ACTION_VIEW)){ 브라우저로 열기
                     this.data = Uri.parse(data.link)
                     startActivity(this)
                 }*/
+            }
+        }
+    }
+
+    /**
+     * 최근 검색어 선택 후 검색을 하기 위한 Receiver
+     * **/
+    private class SearchReceiver(
+        private val viewModel: MainViewModel ,
+        private val binding : ActivityMainBinding
+    ) : BroadcastReceiver() {
+        override fun onReceive(context : Context?, target : Intent?) {
+            when(target?.action){
+                Utils.ACTION_SEARCH_KEYWORD -> {
+                    Log.d(TAG, "onReceive: ACTION_SEARCH_KEYWORD")
+                    val keyword = target.getStringExtra(Utils.EXTRA_SELECTED_KEYWORD)
+                    keyword?.let {
+                        binding.searchEditText.text = Editable.Factory.getInstance().newEditable(it)
+                        viewModel.setSearchKeyword(it)
+                    }
+                }
             }
         }
     }

@@ -19,13 +19,19 @@ interface RecentDAO {
     /**
      * 최근 기록된 상위 10개의 최근 검색어를 불러오는 함수
      * **/
-    @Query("SELECT * FROM ${DatabaseConst.TABLE_NAME}")
+    @Query("SELECT * FROM ${DatabaseConst.TABLE_NAME} ORDER BY `index` DESC LIMIT 10")
     suspend fun getRecentKeyword() : MutableList<RecentKeywordEntity>
 
     /**
-     * 최근 검색어를 업데이트 하는 함수
+     * 최근 검색어를 삭제 하는 함수
      * **/
     @Delete
     suspend fun deleteRecentKeyword(recentKeyword: RecentKeywordEntity)
+
+    /**
+     * 모든 최근 검색어를 삭제 하는 함수
+     * **/
+    @Query("DELETE FROM ${DatabaseConst.TABLE_NAME}")
+    suspend fun deleteAllRecentKeyword()
 
 }

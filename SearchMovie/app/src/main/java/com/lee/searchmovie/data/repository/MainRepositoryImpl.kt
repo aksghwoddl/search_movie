@@ -45,4 +45,9 @@ class MainRepositoryImpl @Inject constructor(
      * **/
     override suspend fun deleteRecentKeyword(recentKeywordEntity: RecentKeywordEntity) = recentDAO.deleteRecentKeyword(recentKeywordEntity)
 
+    /**
+     * 모든 최근 검색어 삭제하기
+     * **/
+    override suspend fun deleteAllRecentKeyword() = recentDAO.deleteAllRecentKeyword()
+
 }

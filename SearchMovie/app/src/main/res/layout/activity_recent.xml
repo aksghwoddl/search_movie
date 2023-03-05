@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
     <data>
         <variable
             name="recentActivity"
@@ -37,7 +38,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_arrow_back_24"
-                android:backgroundTint="#F9F9F9"
+                android:backgroundTint="@color/basic_background_tint"
                 android:layout_marginBottom="@dimen/basic_margin"
                 android:layout_centerVertical="true"
                 android:onClick="@{() -> recentActivity.finish()}"
@@ -68,22 +69,51 @@
                 android:textSize="12sp"
                 />
 
-            <Button
-                android:id="@+id/removeAllButton"
-                android:layout_width="70dp"
-                android:layout_height="30dp"
+            <TextView
+                android:id="@+id/deleteAllTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_alignParentEnd="true"
                 android:layout_centerVertical="true"
                 android:layout_marginStart="@dimen/basic_margin"
                 android:layout_marginTop="@dimen/basic_margin"
                 android:layout_marginEnd="@dimen/basic_margin"
                 android:layout_marginBottom="@dimen/basic_margin"
-                android:background="@drawable/click_round_button_background"
+                android:clickable="true"
+                android:focusable="true"
                 android:text="@string/remove_all"
                 android:textColor="@drawable/click_button_text"
-                android:textSize="12sp"
-                />
+                android:textSize="12sp" />
         </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/noDataLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toBottomOf="@id/headerLayout"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:orientation="vertical"
+            >
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_search_off_100"
+                android:layout_gravity="center"
+                />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/no_data"
+                android:layout_gravity="center"
+                android:textColor="@color/sub_text_color"
+                android:layout_margin="20dp"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                />
+
+        </LinearLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recentKeywordRV"
@@ -93,6 +123,8 @@
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
+            tools:listitem="@layout/recent_keyword_item"
+            android:visibility="invisible"
             />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
