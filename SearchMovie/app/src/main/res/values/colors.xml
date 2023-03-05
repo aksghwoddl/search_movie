@@ -10,4 +10,5 @@
     <color name="main_color">#17CE5F</color>
     <color name="basic_text_color">#404041</color>
     <color name="sub_text_color">#939597</color>
+    <color name="basic_background_tint">#F9F9F9</color>
 </resources>

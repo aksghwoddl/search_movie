@@ -5,6 +5,7 @@ package com.lee.searchmovie.common
  * **/
 class DatabaseConst {
     companion object{
-
+        const val DB_NAME = "recent_keyword.db"
+        const val TABLE_NAME = "recent_keyword_tbl"
     }
 }

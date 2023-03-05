@@ -43,6 +43,7 @@
             android:ellipsize="marquee"
             android:focusable="true"
             android:marqueeRepeatLimit="marquee_forever"
+            android:textColor="@color/basic_text_color"
             />
         <TextView
             android:id="@+id/releaseDateTV"
@@ -51,6 +52,7 @@
             android:text="@string/release_date"
             android:layout_marginStart="@dimen/basic_margin"
             android:layout_marginTop="@dimen/basic_margin"
+            android:textColor="@color/basic_text_color"
             />
         <TextView
             android:id="@+id/ratingTV"
@@ -59,6 +61,7 @@
             android:text="@string/rating"
             android:layout_marginStart="@dimen/basic_margin"
             android:layout_marginTop="@dimen/basic_margin"
+            android:textColor="@color/basic_text_color"
             />
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

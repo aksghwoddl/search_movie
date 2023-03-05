@@ -6,10 +6,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lee.searchmovie.BuildConfig
+import com.lee.searchmovie.data.model.local.RecentKeywordEntity
 import com.lee.searchmovie.data.model.remote.MovieDTO
 import com.lee.searchmovie.data.model.remote.MovieResultDTO
 import com.lee.searchmovie.domain.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -30,9 +34,6 @@ class MainViewModel @Inject constructor(
     private val _searchResult = MutableLiveData<MovieResultDTO>()
     val searchResult : LiveData<MovieResultDTO>
     get() = _searchResult
-    fun setSearchResult(result : MovieResultDTO){
-        _searchResult.value = result
-    }
 
     private val _movieList = MutableLiveData<ArrayList<MovieDTO>>()
     val movieList : LiveData<ArrayList<MovieDTO>>
@@ -77,12 +78,33 @@ class MainViewModel @Inject constructor(
                 )
                 if(response.isSuccessful){ // 검색 성공
                     response.body()?.let { result ->
-                        setSearchResult(result)
+                       _searchResult.value = result
                     }
-                    setIsProgress(false)
                 } else { // 검색 실패
                     Log.d(TAG, "searchMovie: fail searching movie${response.code()}")
                     setIsProgress(false)
+                }
+            }
+        }
+    }
+
+    /**
+     * 검색어 저장하기
+     * **/
+    fun saveRecentKeyword() {
+        searchKeyword.value?.let {
+            if(it.isNotEmpty()){ // 검색어가 빈 텍스트가 아닐때만 저장
+                viewModelScope.launch(Dispatchers.IO) {
+                    val keywordList = repository.getRecentKeyword()
+                    val searchKeywordFlow = keywordList.asFlow().filter { recentKeyword -> // 키워드를 검색하는 Flow 생성
+                        recentKeyword.keyword == it
+                    }
+
+                    searchKeywordFlow.collect{ keyword -> // 현재 검색한 키워드와 같은 키워드가 이미 저장되어있다면 해당 키워드는 삭제
+                        repository.deleteRecentKeyword(keyword)
+                    }
+                    val saveKeyword = RecentKeywordEntity(null , it)
+                    repository.insertRecentKeyword(saveKeyword) // 키워드 저장
                 }
             }
         }
