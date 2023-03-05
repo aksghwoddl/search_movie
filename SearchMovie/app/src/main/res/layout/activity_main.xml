@@ -46,6 +46,7 @@
                 android:src="@drawable/ic_recent_24"
                 android:backgroundTint="#F9F9F9"
                 android:layout_gravity="center_vertical"
+                android:onClick="@{() -> mainActivity.startRecentKeywordActivity()}"
                 />
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/searchTextInputLayout"

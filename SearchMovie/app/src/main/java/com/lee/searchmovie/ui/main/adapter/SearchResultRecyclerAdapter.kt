@@ -47,7 +47,7 @@ class SearchResultRecyclerAdapter : ListAdapter<MovieDTO, SearchResultRecyclerAd
                with(binding){
                    setPosterImage(data.image)
                    movieNameTV.run { // 영화 제목
-                       text = String.format(binding.root.resources.getString(R.string.movie_name) , parsingHtmlData(data.title))
+                       text = parsingHtmlData(data.title)
                        isSelected = true // 마퀴 동작을 위한 Focus
                    }
                    releaseDateTV.text = String.format(binding.root.resources.getString(R.string.release_date) , data.pubDate) // 출시일

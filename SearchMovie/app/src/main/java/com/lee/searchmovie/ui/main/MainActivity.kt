@@ -20,6 +20,7 @@ import com.lee.searchmovie.databinding.ActivityMainBinding
 import com.lee.searchmovie.ui.detail.DetailActivity
 import com.lee.searchmovie.ui.main.adapter.SearchResultRecyclerAdapter
 import com.lee.searchmovie.ui.main.viewmodel.MainViewModel
+import com.lee.searchmovie.ui.recent.RecentActivity
 import dagger.hilt.android.AndroidEntryPoint
 
 /**
@@ -77,6 +78,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                             noResultIV.visibility = View.VISIBLE
                             searchMovieRV.visibility = View.INVISIBLE
                         }
+                        setIsProgress(false)
                     } else { // 검색 결과가 존재할때
                         binding.run {
                             noResultIV.visibility = View.GONE
@@ -120,14 +122,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
      * **/
     override fun addListeners() {
         with(binding){
-            searchEditText.setOnKeyListener { _, keyCode , _ -> // 검색버튼
+            searchEditText.setOnKeyListener { _, keyCode , keyEvent -> // 검색버튼
                 when(keyCode) {
                     KeyEvent.KEYCODE_ENTER -> {
-                        searchEditText.text?.let {
-                            if(it.isNotEmpty()){ // 검색창이 비어있지 않을때
-                                viewModel.setSearchKeyword(it.toString())
-                            } else { // 검색창이 비어있을때
-                                viewModel.setToastMessage(resources.getString(R.string.input_keyword))
+                        if(keyEvent.action == KeyEvent.ACTION_UP){ // 두번 실행되는것을 방직
+                            searchEditText.text?.let {
+                                if(it.isNotEmpty()){ // 검색창이 비어있지 않을때
+                                    with(viewModel){
+                                        setSearchKeyword(it.toString())
+                                        saveRecentKeyword() // 검색어 저장하기
+                                    }
+                                } else { // 검색창이 비어있을때
+                                    viewModel.setToastMessage(resources.getString(R.string.input_keyword))
+                                }
                             }
                         }
                     }
@@ -169,6 +176,16 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private fun addNewList(list : ArrayList<MovieDTO>) {
         if(::searchResultRecyclerAdapter.isInitialized){
             searchResultRecyclerAdapter.submitList(list)
+        }
+        viewModel.setIsProgress(false)
+    }
+
+    /**
+     * 최근 검색어 화면 실행하기
+     * **/
+    fun startRecentKeywordActivity() {
+        with(Intent(this@MainActivity , RecentActivity::class.java)){
+            startActivity(this)
         }
     }
 
