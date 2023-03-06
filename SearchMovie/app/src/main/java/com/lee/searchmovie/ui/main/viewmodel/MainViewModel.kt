@@ -96,6 +96,7 @@ class MainViewModel @Inject constructor(
                     }
                 } else { // 검색 실패
                     Log.d(TAG, "searchMovie: fail searching movie${response.code()}")
+                    resourceProvider.getString(R.string.fail_response)
                     setIsProgress(false)
                 }
             }

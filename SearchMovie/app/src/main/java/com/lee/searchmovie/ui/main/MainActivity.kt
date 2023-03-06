@@ -88,13 +88,13 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                 if(checkFirstPage()){ // 첫 페이지일 경우
                     if(it.isEmpty()){ // 검색 결과가 존재하지 않을때
                         binding.run {
-                            noResultIV.visibility = View.VISIBLE
+                            noResultLayout.visibility = View.VISIBLE
                             searchMovieRV.visibility = View.INVISIBLE
                         }
                         setIsProgress(false)
                     } else { // 검색 결과가 존재할때
                         binding.run {
-                            noResultIV.visibility = View.GONE
+                            noResultLayout.visibility = View.GONE
                             searchMovieRV.visibility = View.VISIBLE
                         }
                        addNewList(it)

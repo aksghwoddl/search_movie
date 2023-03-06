@@ -45,7 +45,6 @@ class DetailActivity : BaseActivity<ActivityDetailBinding>(R.layout.activity_det
     override fun observeData() {
         with(viewModel){
             receivedUrl.observe(this@DetailActivity){ // 전달받은 URL
-                Log.d(TAG, "observeData: $it")
                 binding.movieUrlPage.loadUrl(it)
             }
 

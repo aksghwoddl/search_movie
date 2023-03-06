@@ -20,7 +20,6 @@ import com.lee.searchmovie.databinding.SearchResultItemBinding
  * 검색 결과 RecyclerViewAdapter
  * **/
 private const val EMPTY_IMAGE = ""
-private const val TAG = "SearchResultRecyclerAdapter"
 
 class SearchResultRecyclerAdapter : ListAdapter<MovieDTO, SearchResultRecyclerAdapter.SearchResultViewHolder>(DiffUtilCallBack()) {
     private lateinit var onItemClickListener : OnItemClickListener
@@ -74,7 +73,6 @@ class SearchResultRecyclerAdapter : ListAdapter<MovieDTO, SearchResultRecyclerAd
          * **/
         private fun setPosterImage(image : String){
             if(image == EMPTY_IMAGE){
-                Log.d(TAG, "bind: image is empty!!")
                 Glide.with(binding.root)
                     .load(R.drawable.no_image)
                     .into(binding.posterIV)
