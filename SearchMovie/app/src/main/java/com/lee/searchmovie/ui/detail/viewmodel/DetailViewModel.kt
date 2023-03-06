@@ -27,11 +27,4 @@ class DetailViewModel @Inject constructor(
     fun setIsProgress(on : Boolean) {
         _isProgress.value = on
     }
-
-    private val _toastMessage = MutableLiveData<String>()
-    val toastMessage : LiveData<String>
-    get() = _toastMessage
-    fun setToastMessage(message : String) {
-        _toastMessage.value = message
-    }
 }
