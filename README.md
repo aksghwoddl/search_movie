@@ -1,4 +1,4 @@
-# search_movie
+# 🎬 영화검색하기
 영화를 검색해보자 :)
 
 ## 🤔 프로젝트 설명
@@ -47,3 +47,12 @@
 ##### 6️⃣ Glide를 통해 이미지 작업을 진행 하였습니다.
 ##### 7️⃣ Repository를 사용하여 Data를 관리 하였습니다.
 ##### 8️⃣ ListAdapter , DiffUtil , AsyncListDiffer를 사용하여 RecyclerView의 Adapter를 구현 하였습니다.
+##### 9️⃣ WebView를 통해 영화 상세정보를 표시하도록 구현 하였습니다.
+
+<br>
+
+### 🎥 시연 화면
+<div align="center">
+ <img width="30%" alt="app_main" src="https://user-images.githubusercontent.com/65700842/223024393-02bc3642-1e64-46ef-a8c1-44d60aceed7e.gif">
+</div>
+
