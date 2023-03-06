@@ -12,7 +12,9 @@
     </data>
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="@color/basic_background_tint"
+        >
 
         <ProgressBar
             android:id="@+id/progressBar"
@@ -66,6 +68,8 @@
                     android:paddingStart="@dimen/basic_margin"
                     android:paddingEnd="0dp"
                     android:textSize="15sp"
+                    android:textColorHint="@color/sub_text_color"
+                    android:textColor="@color/basic_text_color"
                     />
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>

@@ -6,6 +6,7 @@
         android:left="-5dp"
         >
         <shape>
+            <solid android:color="@color/basic_background_tint"/>
             <stroke android:color="#EBEBEB" android:width="2dp"/>
         </shape>
     </item>
