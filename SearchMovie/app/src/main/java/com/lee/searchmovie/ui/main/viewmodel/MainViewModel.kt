@@ -6,22 +6,27 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.lee.searchmovie.BuildConfig
+import com.lee.searchmovie.R
+import com.lee.searchmovie.common.provider.ResourceProvider
 import com.lee.searchmovie.data.model.local.RecentKeywordEntity
 import com.lee.searchmovie.data.model.remote.MovieDTO
 import com.lee.searchmovie.data.model.remote.MovieResultDTO
 import com.lee.searchmovie.domain.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 private const val TAG = "MainViewModel"
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
-    private val repository: MainRepository
+    private val repository: MainRepository ,
+    private val resourceProvider: ResourceProvider
 ) : ViewModel() {
 
     private val _searchKeyword = MutableLiveData<String>()
@@ -63,11 +68,20 @@ class MainViewModel @Inject constructor(
         _isProgress.value = on
     }
 
+    private val exceptionHandler = CoroutineExceptionHandler{ _ , exception ->
+        when(exception){
+            is SocketTimeoutException -> {
+                _toastMessage.value = resourceProvider.getString(R.string.socket_timeout)
+                _isProgress.value = false
+            }
+        }
+    }
+
     /**
      * 영화 검색하기
      * **/
     fun searchMovie() {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             setIsProgress(true)
             searchKeyword.value?.let { keyword ->
                 val response = repository.searchMovie(
@@ -82,6 +96,7 @@ class MainViewModel @Inject constructor(
                     }
                 } else { // 검색 실패
                     Log.d(TAG, "searchMovie: fail searching movie${response.code()}")
+                    resourceProvider.getString(R.string.fail_response)
                     setIsProgress(false)
                 }
             }
@@ -95,12 +110,9 @@ class MainViewModel @Inject constructor(
         searchKeyword.value?.let {
             if(it.isNotEmpty()){ // 검색어가 빈 텍스트가 아닐때만 저장
                 viewModelScope.launch(Dispatchers.IO) {
-                    val keywordList = repository.getRecentKeyword()
-                    val searchKeywordFlow = keywordList.asFlow().filter { recentKeyword -> // 키워드를 검색하는 Flow 생성
+                    repository.getRecentKeyword().asFlow().filter { recentKeyword -> // 키워드를 검색하는 Flow 생성
                         recentKeyword.keyword == it
-                    }
-
-                    searchKeywordFlow.collect{ keyword -> // 현재 검색한 키워드와 같은 키워드가 이미 저장되어있다면 해당 키워드는 삭제
+                    }.collect { keyword -> // 현재 검색한 키워드와 같은 키워드가 이미 저장되어있다면 해당 키워드는 삭제
                         repository.deleteRecentKeyword(keyword)
                     }
                     val saveKeyword = RecentKeywordEntity(null , it)

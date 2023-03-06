@@ -1,5 +1,8 @@
 <resources>
     <string name="app_name">영화검색하기</string>
+    <string name="check_network">인터넷 연결 상태를 확인해주세요.</string>
+    <string name="socket_timeout">인터넷 연결 시간을 초과했습니다. 다시 시도해주세요.</string>
+    <string name="fail_response">통신에 실패했습니다. 다시 시도해주세요.</string>
 
     <!--Main -->
     <string name="search">검색</string>
@@ -8,6 +11,7 @@
     <string name="movie_name">제목</string>
     <string name="release_date">출시일 : %s </string>
     <string name="rating">평점 : %s </string>
+    <string name="no_result">조회된 내용이 없습니다.</string>
 
     <!-- Recent -->
     <string name="recent_keyword">최근 검색어</string>

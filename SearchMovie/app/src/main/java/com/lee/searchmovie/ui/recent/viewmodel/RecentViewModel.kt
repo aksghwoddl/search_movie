@@ -9,9 +9,11 @@ import com.lee.searchmovie.common.provider.ResourceProvider
 import com.lee.searchmovie.data.model.local.RecentKeywordEntity
 import com.lee.searchmovie.domain.repository.MainRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 /**
@@ -67,7 +69,6 @@ class RecentViewModel @Inject constructor(
                 }
             }
             _recentKeywordList.value = result
-            _toastMessage.value = resourceProvider.getString(R.string.success_all_delete)
         }
     }
 
