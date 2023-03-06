@@ -42,7 +42,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.run {
+        binding.apply {
             mainViewModel = viewModel
             mainActivity = this@MainActivity
         }
@@ -109,7 +109,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
                     searchMovie()
                 } else {
                     searchResult.value?.let {
-                        if(it.total > currentPage){
+                        if(it.total > currentPage){ // 마지막 페이지 체크
                             searchMovie()
                         }
                     }
@@ -138,14 +138,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
             searchEditText.setOnKeyListener { _, keyCode , keyEvent -> // 검색버튼
                 when(keyCode) {
                     KeyEvent.KEYCODE_ENTER -> {
-                        if(keyEvent.action == KeyEvent.ACTION_UP){ // 두번 실행되는것을 방직
-                            searchEditText.text?.let {
-                                if(it.isNotEmpty()){ // 검색창이 비어있지 않을때
-                                    with(viewModel){
-                                        setSearchKeyword(it.toString())
-                                        saveRecentKeyword() // 검색어 저장하기
-                                    }
-                                    Utils.hideSoftInputKeyboard(this@MainActivity , root.windowToken)
+                        if(keyEvent.action == KeyEvent.ACTION_UP){ // 두번 실행되는것을 방지
+                            searchEditText.text.toString().let { keyword ->
+                                if(keyword.isNotEmpty()){ // 검색창이 비어있지 않을때
+                                    searchMovie(keyword)
                                 } else { // 검색창이 비어있을때
                                     viewModel.setToastMessage(resources.getString(R.string.input_keyword))
                                 }
@@ -166,10 +162,10 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     private fun initRecyclerView() {
         searchResultRecyclerAdapter = SearchResultRecyclerAdapter()
         searchResultRecyclerAdapter.setOnItemClickListener(ItemClickListener(this@MainActivity))
-        binding.searchMovieRV.run {
+        binding.searchMovieRV.apply {
             layoutManager = LinearLayoutManagerWrapper(this@MainActivity)
             adapter = searchResultRecyclerAdapter
-            addOnScrollListener(ScrollListener(viewModel))
+            addOnScrollListener(ScrollListener(viewModel , this@MainActivity))
             itemAnimator = null // 깜빡임 방지
         }
     }
@@ -179,6 +175,23 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
         val intentFilter = IntentFilter()
         intentFilter.addAction(Utils.ACTION_SEARCH_KEYWORD)
         registerReceiver(searchReceiver , intentFilter)
+    }
+
+    /**
+     * 영화를 검색하는 함수
+     * - keyword : 검색할 단어
+     * **/
+    private fun searchMovie(keyword : String){
+        if(Utils.checkNetworkConnection(this@MainActivity)){ // 네트워크 연결상태 체크
+            with(viewModel){
+                setSearchKeyword(keyword) // LiveData setting
+                saveRecentKeyword() // 검색어 저장하기
+            }
+        } else { // 네트워크 연결 되어있지 않을때
+            viewModel.setToastMessage(getString(R.string.check_network))
+            viewModel.setIsProgress(false)
+        }
+        Utils.hideSoftInputKeyboard(this@MainActivity , binding.root.windowToken) // 키패드 숨기기
     }
 
     /**
@@ -193,6 +206,7 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
 
     /**
      * Adapter에 subList하는 함수
+     * - list : 변경할 새로운 리스트
      * **/
     private fun addNewList(list : ArrayList<MovieDTO>) {
         if(::searchResultRecyclerAdapter.isInitialized){
@@ -213,17 +227,22 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
     /**
      * RecyclerView Scroll 리스너
      * **/
-    private class ScrollListener(private val viewModel : MainViewModel) : OnScrollListener() {
+    private class ScrollListener(
+        private val viewModel : MainViewModel ,
+        private val context: Context
+    ) : OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            if(!recyclerView.canScrollVertically(RECYCLER_VIEW_BOTTOM)){
-                if(viewModel.isProgress.value!!){ // 아직 로딩이 끝나지 않았음에도 연속으로 페이징 처리가 되는것을 방지
-                    Log.d(TAG, "onScrollStateChanged: skip paging , app did not loading result yet")
-                } else {
-                    if(viewModel.searchKeyword.value!!.isNotEmpty()){ // 검색 키워드가 비어있지 않을때
-                        viewModel.page.value?.let { currentPage ->
-                            val newPage = currentPage + NetworkConst.DISPLAY_PAGE_VALUE
-                            viewModel.setPage(newPage)
+            if(Utils.checkNetworkConnection(context)){ // 네트워크 연결 상태일때만 추가 페이지 로딩
+                if(!recyclerView.canScrollVertically(RECYCLER_VIEW_BOTTOM)){
+                    if(viewModel.isProgress.value!!){ // 아직 로딩이 끝나지 않았음에도 연속으로 페이징 처리가 되는것을 방지
+                        Log.d(TAG, "onScrollStateChanged: skip paging , app did not loading result yet")
+                    } else {
+                        if(viewModel.searchKeyword.value!!.isNotEmpty()){ // 검색 키워드가 비어있지 않을때
+                            viewModel.page.value?.let { currentPage ->
+                                val newPage = currentPage + NetworkConst.DISPLAY_PAGE_VALUE
+                                viewModel.setPage(newPage)
+                            }
                         }
                     }
                 }
@@ -236,15 +255,19 @@ class MainActivity : BaseActivity<ActivityMainBinding>(R.layout.activity_main) {
      * **/
     private class ItemClickListener(private val context : Context) : OnItemClickListener {
         override fun onClick(view: View, data: Any, position: Int) {
-            if(data is MovieDTO){
-                with(Intent( context, DetailActivity::class.java)){
-                    putExtra(Utils.EXTRA_MOVIE_URL , data.link)
-                    context.startActivity(this)
+            if(Utils.checkNetworkConnection(context)){ // 인터넷 연결 상태
+                if(data is MovieDTO){
+                    with(Intent( context, DetailActivity::class.java)){
+                        putExtra(Utils.EXTRA_MOVIE_URL , data.link)
+                        context.startActivity(this)
+                    }
+                    /*with(Intent(Intent.ACTION_VIEW)){ 브라우저로 열기
+                        this.data = Uri.parse(data.link)
+                        startActivity(this)
+                    }*/
                 }
-                /*with(Intent(Intent.ACTION_VIEW)){ 브라우저로 열기
-                    this.data = Uri.parse(data.link)
-                    startActivity(this)
-                }*/
+            } else { // 인터넷이 연결되어 있지 않을때
+                Toast.makeText(context , context.getString(R.string.check_network) , Toast.LENGTH_SHORT).show()
             }
         }
     }
